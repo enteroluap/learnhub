@@ -71,10 +71,20 @@ Route::middleware('auth:api')->group(function () {
     Route::post('courses/{id}/ratings', [RatingController::class, 'store']);
     Route::get('courses/{id}/ratings', [RatingController::class, 'courseRatings']);
 
-    // Certificados
+    // Rotas para certificados
     Route::get('certificates', [CertificateController::class, 'index']);
     Route::get('certificates/{id}', [CertificateController::class, 'show']);
-    Route::get('certificates/{id}/download', [CertificateController::class, 'download']);
+    Route::get('certificates/{id}/download', [CertificateController::class, 'download'])->name('certificates.download');
+    Route::post('certificates/{id}/regenerate', [CertificateController::class, 'regenerate']);
+    Route::post('courses/{id}/certificate', [CertificateController::class, 'generate']);
+
+    // Rota pública para verificação de certificados (não requer autenticação)
+    Route::post('certificates/verify', [CertificateController::class, 'verify'])->withoutMiddleware('auth:api');
+
+    // Rotas para administradores (dentro do middleware para administradores)
+    Route::middleware('can:manage-courses')->group(function () {
+        Route::get('admin/certificates', [CertificateController::class, 'adminList']);
+    });
 
     // Pagamentos
     Route::post('payments/process', [PaymentController::class, 'process']);
